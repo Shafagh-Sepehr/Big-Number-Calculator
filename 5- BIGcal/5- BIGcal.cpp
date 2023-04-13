@@ -44,7 +44,7 @@ public:
 
 	number(const char* s) :str(new char[SIZE]) { strcpy(str, s); size = strlen(str); }
 
-	number(number& that) : str(new char[SIZE]), size(that.size) { strcpy(this->str, that.str); }
+	number(const number& that) : str(new char[SIZE]), size(that.size) { strcpy(this->str, that.str); }
 
 
 	~number() { delete[] str; }
@@ -64,22 +64,22 @@ public:
 
 	int operator[](int i) const { return str[i]; }
 
-	number& operator+(const number that) {
+	number operator+(const number that) {
 
 		char* ans = sum(this->str, that.str);
-		number* to_return = new number(ans);
+		number to_return(ans);
 		delete[] ans;
-		return *to_return;
+		return to_return;
 	}
 
-	number& operator+(long long int num) {
+	number operator+(long long int num) {
 
 		char* num_str = int_to_char(num);
 		char* ans = sum(this->str, num_str);
-		number* to_return = new number(ans);
+		number to_return(ans);
 		delete[] ans;
 		delete[] num_str;
-		return *to_return;
+		return to_return;
 	}
 
 	static char* sum(char* a, char* b) {
@@ -161,23 +161,28 @@ public:
 	char* get_num_str() { return str; }
 };
 
-number& operator+(long long num, number num_obj) {
+number operator+(long long num, number num_obj) {
 	return num_obj + num;
 }
 
+ostream& operator<<(ostream& out, number num_obj) {
+	out << num_obj.get_num_str();
+	return out;
+}
 
 int main() {
 
 	number a("9");
 	number b("81565191561");
-	number c = a + b;
-	cout << a.get_num_str() << " + " << b.get_num_str() << " = " << c.get_num_str();
+	number c = a + 9;
+	cout << a << " + " << b << " = " << c << endl;
 
 	number d, e;
 	d = 9 + a;
-	e = a + 9;
+	e = d + 9;
 
-
+	cout << 9 << " + " << a << " = " << d << endl;
+	cout << d << " + " << 9 << " = " << e << endl;
 
 
 
