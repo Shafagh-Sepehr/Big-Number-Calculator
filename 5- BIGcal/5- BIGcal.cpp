@@ -65,32 +65,40 @@ public:
 	int operator[](int i) const { return str[i]; }
 
 	number& operator+(const number that) {
-		char* ans = new char[SIZE];
-		sum(this->str, that.str, ans);
-		number to_return(ans);
+
+		char* ans = sum(this->str, that.str);
+		number* to_return = new number(ans);
 		delete[] ans;
-		return to_return;
+		return *to_return;
 	}
 
 	number& operator+(long long int num) {
-		char* ans = new char[SIZE];
+
 		char* num_str = int_to_char(num);
-		sum(this->str, num_str, ans);
-		number to_return(ans);
+		char* ans = sum(this->str, num_str);
+		number* to_return = new number(ans);
 		delete[] ans;
-		return to_return;
+		delete[] num_str;
+		return *to_return;
 	}
 
-	static char* sum(char* a, char* b, char* ans) {
+	static char* sum(char* a, char* b) {
 
 
 		int len1, len2, temp;
+		char* ans;
+
+
+
+
 
 		bool overflow = false;
 
 		len1 = strlen(a);
 		len2 = strlen(b);
 		if (len2 > len1) {
+
+
 			char* temp = a;
 			a = b;
 			b = temp;
@@ -98,6 +106,8 @@ public:
 			len2 = len1;
 			len1 = tmp;
 		}
+		ans = new char[len1 + 2];
+
 		ans[len1 + 1] = '\0';
 		for (int n = len1 - 1, m = len2 - 1; n >= 0; n--, m--) {
 			if (m >= 0) {
@@ -148,16 +158,24 @@ public:
 
 
 
-	char* get_num() { return str; }
+	char* get_num_str() { return str; }
 };
+
+number& operator+(long long num, number num_obj) {
+	return num_obj + num;
+}
+
 
 int main() {
 
 	number a("9");
 	number b("81565191561");
 	number c = a + b;
-	cout << a.get_num() << " + " << b.get_num() << " = " << c.get_num();
+	cout << a.get_num_str() << " + " << b.get_num_str() << " = " << c.get_num_str();
 
+	number d, e;
+	d = 9 + a;
+	e = a + 9;
 
 
 
