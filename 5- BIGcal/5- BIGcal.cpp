@@ -3,7 +3,8 @@
 #include <limits.h>
 #pragma warning(disable:4996)
 using namespace std;
-#define SIZE 101
+#define SIZE 150
+#define MUL_MAX_SIZE SIZE*2
 
 int get_int_len(long long int num) {
 	int len = 0;
@@ -36,19 +37,33 @@ public:
 	number() :str(new char[SIZE]), size(0) { str[0] = '0'; str[1] = '\0'; }
 
 	//constructor 2
-	number(const char* s, int l) :str(new char[SIZE]), size(l) {
-		strcpy(str, s);
+	number(const char* s, int l) {
+
+		size = l;
+
 		if (strlen(str) != l) {
 			cerr << "the number length isn't correct";
 			exit(0);
 		}
+
+		str = new char[max(SIZE, l)];
+		strcpy(str, s);
+
 	}
 
 	//constructor 3
-	number(const char* s) :str(new char[SIZE]) { strcpy(str, s); size = strlen(str); }
+	number(const char* s) {
+		str = new char[max((int)strlen(s), SIZE)];
+		strcpy(str, s);
+		size = strlen(str);
+	}
 
 	//copy constructor
-	number(const number& that) : str(new char[SIZE]), size(that.size) { strcpy(this->str, that.str); }
+	number(const number& that) {
+		str = new char[max(that.size, SIZE)];
+		size = that.size;
+		strcpy(this->str, that.str);
+	}
 
 	//destructor
 	~number() { delete[] str; }
@@ -93,73 +108,7 @@ public:
 		delete[] num_str;
 		return to_return;
 	}
-	static char* sum(char* a, char* b) {
 
-		int len1, len2, temp;
-		char* ans;
-		bool overflow = false;
-
-		len1 = strlen(a);
-		len2 = strlen(b);
-		if (len2 > len1) {
-
-
-			char* temp = a;
-			a = b;
-			b = temp;
-			int tmp = len2;
-			len2 = len1;
-			len1 = tmp;
-		}
-		ans = new char[len1 + 2];
-
-		ans[len1 + 1] = '\0';
-		for (int n = len1 - 1, m = len2 - 1; n >= 0; n--, m--) {
-			if (m >= 0) {
-				temp = a[n] + b[m] - '0' * 2;
-				if (overflow) {
-					temp += 1;
-					overflow = false;
-				}
-				if (temp < 10) {
-					ans[n + 1] = temp + '0';
-				}
-				else {
-					overflow = true;
-					temp -= 10;
-					ans[n + 1] = temp + '0';
-				}
-			}
-			else {
-				if (overflow) {
-					temp = a[n] + 1 - '0';
-					overflow = false;
-					if (temp > 9) {
-						overflow = true;
-						temp -= 10;
-
-					}
-					ans[n + 1] = temp + '0';
-
-				}
-				else {
-					ans[n + 1] = a[n];
-				}
-
-			}
-		}
-		if (overflow)ans[0] = 1 + '0';
-		else {
-			for (int k = 0; k < len1; k++) {
-				ans[k] = ans[k + 1];
-
-			}
-			ans[len1] = '\0';
-		}
-
-		return ans;
-
-	}
 
 
 	number operator-(const number that) const {
@@ -178,6 +127,30 @@ public:
 		delete[] num_str;
 		return to_return;
 	}
+
+	number operator*(const number that) const {
+
+		char* ans = mul(this->str, that.str);
+		number to_return(ans);
+		delete[] ans;
+		return to_return;
+	}
+	number operator*(long long num) const {
+
+		char* num_str = int_to_char(num);
+		char* ans = mul(this->str, num_str);
+		number to_return(ans);
+		delete[] ans;
+		delete[] num_str;
+		return to_return;
+	}
+
+	char* get_num_str() { return str; }
+
+
+
+
+
 	static char* sub(char* a, char* b) {
 
 
@@ -285,11 +258,161 @@ public:
 
 		return ans;
 	}
+	static char* sum(char* a, char* b) {
+
+		int len1, len2, temp;
+		char* ans;
+		bool overflow = false;
+
+		len1 = strlen(a);
+		len2 = strlen(b);
+		if (len2 > len1) {
+
+
+			char* temp = a;
+			a = b;
+			b = temp;
+			int tmp = len2;
+			len2 = len1;
+			len1 = tmp;
+		}
+		ans = new char[len1 + 2];
+
+		ans[len1 + 1] = '\0';
+		for (int n = len1 - 1, m = len2 - 1; n >= 0; n--, m--) {
+			if (m >= 0) {
+				temp = a[n] + b[m] - '0' * 2;
+				if (overflow) {
+					temp += 1;
+					overflow = false;
+				}
+				if (temp < 10) {
+					ans[n + 1] = temp + '0';
+				}
+				else {
+					overflow = true;
+					temp -= 10;
+					ans[n + 1] = temp + '0';
+				}
+			}
+			else {
+				if (overflow) {
+					temp = a[n] + 1 - '0';
+					overflow = false;
+					if (temp > 9) {
+						overflow = true;
+						temp -= 10;
+
+					}
+					ans[n + 1] = temp + '0';
+
+				}
+				else {
+					ans[n + 1] = a[n];
+				}
+
+			}
+		}
+		if (overflow)ans[0] = 1 + '0';
+		else {
+			for (int k = 0; k < len1; k++) {
+				ans[k] = ans[k + 1];
+
+			}
+			ans[len1] = '\0';
+		}
+
+		return ans;
+
+	}
+	static char* mul(char* a, char* b) {
+
+		char* tempstr;
+		char* ans = new char[SIZE];
+
+		char* cp;
+
+		ans[0] = '0';
+		ans[0] = '\0';
+		int len1, len2, temp, cIndex = SIZE - 2, ctr0 = 0;
+		short strg = 0;
+
+		len1 = strlen(a);
+		len2 = strlen(b);
+		if (len2 > len1) {
+
+			char* temp = a;
+			a = b;
+			b = temp;
+			int tmp = len2;
+			len2 = len1;
+			len1 = tmp;
+		}
+
+
+		for (int n = len2 - 1; n >= 0; n--, ctr0++) {//b[n]
+
+			cIndex = SIZE - 2;
+			cp = new char[SIZE]();
+			tempstr = new char[SIZE + 1]();
+			if (ctr0)strcpy(cp, ans);
+
+
+			for (int m = len1 - 1; m >= 0; m--) {//a[m]
+				temp = (b[n] - '0') * (a[m] - '0');
+
+				if (strg) { temp += strg; strg = 0; }
+
+				if (temp > 9) {
+					tempstr[cIndex] = temp % 10 + '0';
+					cIndex--;
+					strg = temp / 10;
+				}
+				else {
+					tempstr[cIndex] = temp + '0';
+					cIndex--;
+				}
+
+			}
+			int limit = len1;
+			if (strg) { tempstr[cIndex] = strg + '0'; strg = 0; cIndex--; limit++; }
 
 
 
+			int counter = 0;
+			for (int i = 0; tempstr[i] == NULL; i++) {
+				counter++;
+			}
+			for (int k = 0; k < limit; k++) {
+				tempstr[k] = tempstr[k + counter];
 
-	char* get_num_str() { return str; }
+			}
+
+
+
+			{
+				int l = strlen(tempstr);
+				tempstr[l + ctr0] = '\0';
+
+				for (int p = 0; p < ctr0; p++) {
+
+					tempstr[l + p] = '0';
+
+				}
+			}
+
+
+			delete[] ans;
+			ans = sum(tempstr, cp);
+			delete[] tempstr;
+			delete[] cp;
+		}
+
+		return ans;
+
+
+
+	}
 };
 
 number operator+(long long num, const number num_obj) {
@@ -298,6 +421,9 @@ number operator+(long long num, const number num_obj) {
 
 number operator-(long long num, const number num_obj) {
 	return num_obj - num;
+}
+number operator*(long long num, const number num_obj) {
+	return num_obj * num;
 }
 
 ostream& operator<<(ostream& out, number num_obj) {
@@ -322,6 +448,11 @@ int main() {
 	number f("10000"), g("5000");
 	cout << f << " - " << g << " = " << f - g << endl;
 	cout << g - f << endl;
+
+
+	number h("11378975456"), i("1324679850");
+	cout << h << " * " << i << " = " << h * i << endl;
+
 
 
 	return 0;
