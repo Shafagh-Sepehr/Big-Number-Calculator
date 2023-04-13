@@ -32,8 +32,10 @@ private:
 	char* str;
 	int size;
 public:
+	//constructor 1
 	number() :str(new char[SIZE]), size(0) { str[0] = '0'; str[1] = '\0'; }
 
+	//constructor 2
 	number(const char* s, int l) :str(new char[SIZE]), size(l) {
 		strcpy(str, s);
 		if (strlen(str) != l) {
@@ -42,19 +44,23 @@ public:
 		}
 	}
 
+	//constructor 3
 	number(const char* s) :str(new char[SIZE]) { strcpy(str, s); size = strlen(str); }
 
+	//copy constructor
 	number(const number& that) : str(new char[SIZE]), size(that.size) { strcpy(this->str, that.str); }
 
-
+	//destructor
 	~number() { delete[] str; }
 
+	//copy(=)
 	number operator=(const number& that) {
 		size = that.size;
 		strcpy(this->str, that.str);
 		return *this;
 	}
 
+	//assign(=)
 	int operator== (number that) const {
 		if (this->size != that.size || strcmp(this->str, that.str)/*!=0*/)
 			return 0;
@@ -62,7 +68,14 @@ public:
 			return 1;
 	}
 
-	int operator[](int i) const { return str[i]; }
+	//return i-th digit from left
+	int operator[](int i) const {
+		if (i >= 0 && i < size)
+			return str[i];
+		else
+			return -1;
+	}
+
 
 	number operator+(const number that) {
 
@@ -71,7 +84,6 @@ public:
 		delete[] ans;
 		return to_return;
 	}
-
 	number operator+(long long int num) {
 
 		char* num_str = int_to_char(num);
@@ -81,7 +93,6 @@ public:
 		delete[] num_str;
 		return to_return;
 	}
-
 	static char* sum(char* a, char* b) {
 
 
