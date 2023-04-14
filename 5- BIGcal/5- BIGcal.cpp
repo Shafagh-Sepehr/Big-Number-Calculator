@@ -4,12 +4,14 @@
 #include <iostream>
 #include <limits.h>
 #include <string>
+#include <string.h>
+#include <sstream>
 #pragma warning(disable:4996)
 using namespace std;
 
 
 #define SIZE 1500//not so important, set it to 0 and nothing'l go wrong
-#define MUL_MAX_SIZE SIZE
+#define MUL_MAX_SIZE SIZE*2
 
 
 void khikhi(char* khi, int a) {
@@ -23,26 +25,14 @@ int mypow(unsigned long long int a, unsigned long long int b) {
 	return a * mypow(a, b - 1);
 }
 
-int get_int_len(long long int num) {
-	if (num == 0) { return 1; }
-	int len = 0;
-	while (num) {
-		num /= 10;
-		len++;
-	}
-	return len;
-}
+int get_int_len(long long int num) { return to_string(num).length(); }
 
 char* int_to_char(long long int num) {//you sould manually free the returned pointer's memory after use
-	int len = get_int_len(num);
-	char* str = new char[len + 2];
-	for (int i = 0; i < len; i++) {
-		str[len - 1 - i] = num % 10 + '0';
-		num /= 10;
-	}
-	str[len] = '\0';
+	stringstream box;
+	box << num;
+	char* str = new char[get_int_len(num) + 2];
+	box >> str;
 	return str;
-
 }
 
 
@@ -79,6 +69,13 @@ public:
 	}
 
 	//converting constructor
+	number(const string s) {
+		size = s.length();
+		str = new char[max(size, SIZE) + 1];
+		strcpy(str, s.c_str());
+	}
+
+	//converting constructor
 	number(long long num) {
 		size = get_int_len(num);
 		str = new char[SIZE + 1];
@@ -87,7 +84,7 @@ public:
 		delete[] num_str;
 	}
 
-	//
+	//converting constructor for 0
 	number(int num) {
 		size = get_int_len(num);
 		str = new char[SIZE + 1];
@@ -116,7 +113,7 @@ public:
 		return *this;
 	}
 
-	//assign(=)
+	//compare(=)
 	int operator== (number that) const {
 		if (this->size != that.size || strcmp(this->str, that.str)/*!=0*/)
 			return 0;
@@ -124,21 +121,31 @@ public:
 			return 1;
 	}
 
+
+	int operator!= (number that) const {
+		if (this->size != that.size || strcmp(this->str, that.str)/*!=0*/)
+			return 1;
+		else
+			return 0;
+	}
+
 	//return i-th digit from left
 	int operator[](int i) const {
 		if (i >= 0 && i < size)
-			return str[i];
+			return str[i] - '0';
 		else
 			return -1;
 	}
 
 
-	explicit operator string() { return string(str); }
-	explicit operator long long int() {
+	explicit operator string() const { return string(str); }
+	explicit operator long long int() const {
 		number temp = (*this) % LLONG_MAX;
-		long long a;
-		sscanf(temp.get_num_str(), "%lld", &a);
-		return a;
+		long long num;
+		stringstream box;
+		box << temp.get_num_str();
+		box >> num;
+		return num;
 	}
 
 	number operator+(const number that) const {
@@ -254,24 +261,24 @@ public:
 		return 0;
 	}
 
-	number operator--() {
+	const number operator--() {
 		(*this) -= 1;
 		return (*this);
 	}
-	number operator--(int) {
+	const number operator--(int) {
 		(*this) -= 1;
 		return (*this);
 	}
-	number operator++() {
+	const number operator++() {
 		(*this) += 1;
 		return (*this);
 	}
-	number operator++(int) {
+	const number operator++(int) {
 		(*this) += 1;
 		return (*this);
 	}
 
-	number operator>>(int a) {
+	number operator>>(int a)const {
 		int to_be_dived_by = mypow(2, a);
 		number to_be_returned = (*this) / to_be_dived_by;
 		return to_be_returned;
@@ -281,7 +288,7 @@ public:
 		(*this) = (*this) / to_be_dived_by;
 		return (*this);
 	}
-	number operator<<(int a) {
+	number operator<<(int a)const {
 		int to_be_dived_by = mypow(2, a);
 		number to_be_returned = (*this) * to_be_dived_by;
 		return to_be_returned;
@@ -418,7 +425,7 @@ public:
 
 
 
-	char* get_num_str() { return str; }
+	char* get_num_str() const { return str; }
 
 
 
@@ -874,18 +881,18 @@ public:
 };
 
 
-number operator+(long long num, const number num_obj) { return num_obj + num; }
-number operator-(long long num, const number num_obj) { return (number)num - num_obj; }
-number operator*(long long num, const number num_obj) { return num_obj * num; }
-number operator/(long long num, const number num_obj) { return (number)num / num_obj; }
-number operator%(long long num, const number num_obj) { return (number)num % num_obj; }
-int operator<=(long long num, const number num_obj) { return num_obj >= num; }
-int operator>=(long long num, const number num_obj) { return num_obj <= num; }
-int operator<(long long num, const number num_obj) { return num_obj > num; }
-int operator>(long long num, const number num_obj) { return num_obj < num; }
+number operator+(const long long num, const number num_obj) { return num_obj + num; }
+number operator-(const long long num, const number num_obj) { return (number)num - num_obj; }
+number operator*(const long long num, const number num_obj) { return num_obj * num; }
+number operator/(const long long num, const number num_obj) { return (number)num / num_obj; }
+number operator%(const long long num, const number num_obj) { return (number)num % num_obj; }
+int operator<=(const long long num, const number num_obj) { return num_obj >= num; }
+int operator>=(const long long num, const number num_obj) { return num_obj <= num; }
+int operator<(const long long num, const number num_obj) { return num_obj > num; }
+int operator>(const long long num, const number num_obj) { return num_obj < num; }
 
 
-ostream& operator<<(ostream& out, number num_obj) {
+ostream& operator<<(ostream& out, const number num_obj) {
 	out << num_obj.get_num_str();
 	return out;
 }
@@ -975,6 +982,26 @@ int main() {
 	p4--;
 	cout << long long int(p4) << endl;
 
+	string str = string(p4);
+	cout << endl << str << endl << endl;
+
+	number p5(12), p6(12), p7(13);
+	if (p6 == p7)
+		cout << "p6 == p7" << endl;
+	else if (p5 == p6)
+		cout << "p5 == p6" << endl;
+
+	if (p6 != p7)
+		cout << "p6 != p7" << endl;
+
+	cout << p6[0] << "  " << p6[1] << endl;
+
+
+	p6--;
+
+
+	cout << "p6-- = " << p6 << endl;
+	p5 = p6--;
 	return 0;
 }
 
