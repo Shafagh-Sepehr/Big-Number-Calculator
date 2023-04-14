@@ -9,9 +9,9 @@
 #pragma warning(disable:4996)
 using namespace std;
 
-
-#define SIZE 1500//not so important, set it to 0 and nothing'l go wrong
+#define SIZE 1500
 #define MUL_MAX_SIZE SIZE*2
+
 
 
 void khikhi(char* khi, int a) {
